@@ -1,0 +1,331 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>Trottinette AI Manager</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cinzel+Decorative:wght@700&display=swap">
+<style>
+:root{--bg:#f4f6fb;--c:#fff;--t:#1b1f2a;--m:#6b7280;--p:#2563eb;--b:#e2e5ec;--g:#16a34a;--r:#dc2626;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1117;--c:#171b24;--t:#e8eaf0;--m:#9aa3b2;--p:#5b8cff;--b:#2a3040;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0e1117;--c:#171b24;--t:#e8eaf0;--m:#9aa3b2;--p:#5b8cff;--b:#2a3040;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 12% -5%,rgba(37,99,235,.22),transparent 45%),radial-gradient(circle at 95% 25%,rgba(22,163,74,.14),transparent 40%),var(--bg);background-attachment:fixed;color:var(--t);font:14px system-ui,Segoe UI,Tahoma,sans-serif}.lg{height:30px;border-radius:6px;vertical-align:middle}.ttl{font:700 26px 'Aref Ruqaa','Cinzel Decorative',serif;background:linear-gradient(90deg,#ffe29a,#fff,#ffd76a);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0 8px}.sub{font-size:11px;opacity:.9;margin:0 4px}#fab{position:fixed;bottom:14px;inset-inline-start:14px;z-index:7;border-radius:30px;background:var(--p);color:#fff;font-size:18px;box-shadow:0 4px 14px #0005}#ai{position:fixed;bottom:62px;inset-inline-start:14px;width:min(390px,calc(100vw - 28px));max-height:70vh;display:none;flex-direction:column;background:var(--c);border:1px solid var(--b);border-radius:14px;box-shadow:0 8px 30px #0006;z-index:8}#ai.on{display:flex}#alog p{margin:6px 0;white-space:pre-wrap}.tk{max-width:400px;margin:14px auto;border:2px solid var(--p)}.rc{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}.rc td{padding:2px 4px}.card{box-shadow:0 2px 10px #0001}.k div{border-top:3px solid var(--p);box-shadow:0 2px 8px #0001}nav button{border-radius:20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(120deg,#0b1f4d,#2563eb);color:#fff;box-shadow:0 2px 12px #0004;border-bottom:3px double #ffd76a;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 12px}nav button.on{background:var(--p);color:#fff}
+main,#invoice{padding:0 12px 20px;max-width:1100px;margin:auto}
+button,select,input{font:inherit;color:var(--t);background:var(--c);border:1px solid var(--b);border-radius:8px;padding:7px 10px}
+button{cursor:pointer;white-space:nowrap}button.pr{background:var(--p);color:#fff;border-color:var(--p)}button.sm{padding:3px 8px;font-size:12px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:12px;margin:10px 0}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px}label{display:block;font-size:12px;color:var(--m)}label input,label select{width:100%;margin-top:2px;color:var(--t)}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.k div{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:10px}.k b{display:block;font-size:18px;margin-top:2px}
+.ov{overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{padding:5px 7px;border-bottom:1px solid var(--b);text-align:start;font-size:13px}td input{width:90px;padding:3px 5px}
+.ok{color:var(--g)}.er{color:var(--r)}.mu{color:var(--m)}h3{margin:0 0 8px}
+#toast{display:none;position:fixed;bottom:20px;inset-inline:20px;background:#111;color:#fff;padding:10px;border-radius:8px;text-align:center;z-index:9}
+@media print{@page{margin:3mm}body{background:#fff}body>*:not(#invoice){display:none}#invoice button,#invoice select{display:none}#invoice .card{background:#fff;color:#000}#invoice .rc{border:0;box-shadow:none;margin:0}}
+</style></head><body>
+<header><div><span id="logo">🛴</span><span class="ttl" id="ttl"></span><div class="sub" id="sub"></div></div><span><label style="cursor:pointer;background:#fff3;border-radius:8px;padding:6px 9px">🖼<input type="file" accept="image/*" hidden onchange="img(this.files[0],160,d=>{D.logo=d;R()})"></label> <button onclick="lg()">AR / FR</button> <button onclick="tm()">◐</button></span></header>
+<nav id="nav"></nav><main id="main"></main><div id="invoice"></div><button id="fab" onclick="aiTog()">🤖 <b id="bell"></b></button><div id="ai"><div style="padding:8px 10px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between"><b id="aih"></b><button class="sm" onclick="aiTog()">✕</button></div><div id="alr" style="padding:6px 10px;font-size:12px;max-height:100px;overflow:auto"></div><div id="alog" style="flex:1;overflow:auto;padding:0 10px;min-height:60px"></div><div style="padding:6px;display:flex;gap:4px;flex-wrap:wrap"><button class="sm" id="qb" onclick="ask(t('qbrief'))"></button><input id="aq" style="flex:1;min-width:120px" onkeydown="if(event.key=='Enter')ask()"><button class="pr" onclick="ask()">➤</button></div></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),v=i=>document.getElementById(i).value,tabs=['dash','cust','rep','emp','inv','pos','fin'];
+const x=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),f=n=>(+n||0).toLocaleString('fr-DZ',{minimumFractionDigits:2,maximumFractionDigits:2})+' DA',p2=n=>String(n).padStart(2,'0');
+let D;try{D=JSON.parse((window.desk&&window.desk.load())||localStorage.getItem('tam'))}catch(e){}
+D={c:[],e:[],p:[],r:[],l:[],m:[],s:[],o:[],lang:'ar',th:'',seq:1,tab:'dash',per:'month',cart:[],shop:{},dr:{parts:[],techs:[]},...(D||{})};
+const save=()=>{let s=JSON.stringify(D);try{localStorage.setItem('tam',s)}catch(e){if(!window.desk)toast('⚠ '+t('full'))}try{window.desk&&window.desk.save(s)}catch(e){}},id=p=>p+(D.seq++);
+const nowS=()=>{let n=new Date();return n.getFullYear()+'-'+p2(n.getMonth()+1)+'-'+p2(n.getDate())+'T'+p2(n.getHours())+':'+p2(n.getMinutes())};
+const toast=m=>{let e=$('#toast');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',2600)};
+function img(fl,w,cb){if(!fl)return;let r=new FileReader();r.onload=()=>{let im=new Image();im.onload=()=>{let k=Math.min(1,w/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.8))};im.src=r.result};r.readAsDataURL(fl)}
+const td=()=>nowS().slice(0,10),dts=i=>{let e=document.getElementById(i),d=e&&e.value;return d?d+'T'+nowS().slice(11):nowS()};
+const L={ar:{},fr:{}};`dash|لوحة القيادة|Tableau de bord
+cust|الزبائن|Clients
+rep|الإصلاحات|Réparations
+emp|العمال|Employés
+inv|المخزون|Stock
+pos|نقطة البيع|Vente
+fin|المالية|Finance
+name|الاسم الكامل|Nom complet
+phone|الهاتف|Téléphone
+addr|العنوان (اختياري)|Adresse (optionnel)
+add|إضافة|Ajouter
+search|بحث بالاسم أو الهاتف|Recherche nom/téléphone
+save|حفظ|Enregistrer
+exists|الزبون موجود مسبقاً|Client déjà existant
+req|الاسم والهاتف مطلوبان|Nom et téléphone requis
+model|موديل السكوتر|Modèle trottinette
+labor|اليد العاملة|Main d'œuvre
+part|قطعة|Pièce
+tech|تقني|Technicien
+task|المهمة|Tâche
+create|إنشاء أمر إصلاح|Créer l'ordre
+open|مفتوح|Ouvert
+done|مكتمل|Terminé
+complete|إنهاء الإصلاح|Terminer
+paid|المدفوع|Payé
+earn|المستحقات|Gains
+adv|سلفة|Avance
+owed|المتبقي له|Reste dû
+mode|طريقة الأجر|Mode de rémunération
+fix|مبلغ ثابت لكل إصلاح|Montant fixe/réparation
+pct|نسبة من اليد العاملة|% main d'œuvre
+sal|راتب شهري|Salaire mensuel
+mix|راتب + عمولة|Salaire + commission
+rate|المبلغ / النسبة|Montant / %
+salary|الراتب|Salaire
+accrue|تسجيل راتب الشهر|Accréditer salaire
+pay|دفع|Payer
+amount|المبلغ|Montant
+today|اليوم|Aujourd'hui
+week|هذا الأسبوع|Cette semaine
+month|هذا الشهر|Ce mois
+prev|الشهر الماضي|Mois précédent
+year|هذه السنة|Cette année
+custom|فترة مخصصة|Personnalisée
+scooters|سكوترات مُصلحة|Trottinettes réparées
+orders|أوامر مكتملة|Ordres terminés
+tasks|المهام|Tâches
+sku|الباركود / SKU|SKU / Code-barres
+qty|الكمية|Qté
+cost|سعر الشراء|Prix d'achat
+price|سعر البيع|Prix de vente
+profit|ربح الوحدة|Marge unitaire
+margin|الهامش %|Marge %
+value|القيمة|Valeur
+min|الحد الأدنى|Stock min
+imp|استيراد Excel / CSV|Import Excel / CSV
+row|+ سطر|+ ligne
+confirm|تأكيد المخزون الافتتاحي|Confirmer le stock initial
+valid|صالح|Valide
+missing|ناقص|Manquant
+dup|SKU مكرر|SKU en double
+prods|المنتجات|Produits
+totals|المنتجات / الكميات|Produits / quantités
+purchase|شراء|Achat
+adjust|تعديل المخزون|Ajustement
+init|مخزون افتتاحي|Stock initial
+sale|بيع مباشر|Vente directe
+repair|استهلاك في إصلاح|Conso. réparation
+cret|إرجاع زبون|Retour client
+sret|إرجاع مورد|Retour fournisseur
+adj|تسوية|Ajustement
+dmg|تالف / مفقود|Endommagé/perdu
+note|ملاحظة|Note
+supplier|المورد|Fournisseur
+move|حركات المخزون|Mouvements
+nostock|مخزون غير كاف|Stock insuffisant
+cart|السلة|Panier
+disc|خصم|Remise
+method|طريقة الدفع|Mode de paiement
+cash|نقداً|Espèces
+card|بطاقة|Carte
+bank|تحويل|Virement
+total|المجموع|Total
+needc|الدين يتطلب زبوناً|Crédit : client requis
+walk|زبون عابر|Client de passage
+invoice|فاتورة|Facture
+print|طباعة / PDF|Imprimer / PDF
+rev|الإيرادات|Chiffre d'affaires
+cogs|تكلفة المبيعات|Coût des ventes
+gp|الربح الإجمالي|Marge brute
+exp|المصاريف|Charges
+lab|تكلفة العمال|Coût main d'œuvre
+net|صافي الربح التقديري|Résultat net estimé
+debts|ديون الزبائن|Dettes clients
+stockv|قيمة المخزون|Valeur du stock
+debt|دين|Dette
+advp|دفعة مقدمة|Avance client
+settle|تسديد دين|Régler dette
+useadv|استعمال المقدم|Utiliser l'avance
+dupe|عملية مكررة مرفوضة|Doublon refusé
+over|أكبر من المتبقي|Supérieur au solde
+hist|السجل|Historique
+reverse|عكس|Annuler
+ledger|دفتر العمليات|Journal
+type|النوع|Type
+date|التاريخ|Date
+party|الطرف|Tiers
+desc|الوصف|Description
+from|من|Du
+to|إلى|Au
+a_cd|دين زبون|Dette client
+a_cp|تسديد زبون|Paiement client
+a_ca|مقدم زبون|Avance client
+a_cu|استعمال مقدم|Avance utilisée
+a_ee|مستحق عامل|Gain employé
+a_ep|دفع لعامل|Paiement employé
+a_ea|سلفة عامل|Avance employé
+a_ex|مصروف|Dépense
+a_sd|دين مورد|Dette fournisseur
+a_sp|دفع مورد|Paiement fournisseur
+sup|دفع مورد|Paiement fournisseur
+cmp|مقارنة الإنتاجية|Productivité
+mon|شهرياً|Par mois
+reset|مسح كل البيانات|Effacer les données
+newprod|منتج جديد|Nouveau produit
+workdate|تاريخ العمل|Date du travail
+paydate|تاريخ الدفع|Date de paiement
+nextpay|تاريخ الدفع المبرمج|Paiement prévu
+cat|الفئة|Catégorie
+ttl|✦ ورشة السكوتر الكهربائي ✦|✦ Atelier Trottinette Électrique ✦
+sub|تطبيق لإدارة محل إصلاح وصيانة السكوترات الكهربائية ⚡|Gestion d'atelier de réparation et d'entretien de trottinettes électriques ⚡
+ai|المساعد الذكي|Assistant IA
+qbrief|لخّص لي وضع المحل والتنبيهات|Résume la situation et les alertes
+a_low|مخزون منخفض|Stock bas
+a_debt|دين زبون|Dette client
+a_pay|موعد دفع عامل حان|Paiement employé dû
+a_old|إصلاح متأخر|Réparation en retard
+mtype|نوع الصيانة|Type d'entretien
+ticket|وصل استلام سكوتر|Bon de dépôt
+recvd|تاريخ الإيداع|Date de dépôt
+sign|توقيع الزبون|Signature client
+full|التخزين ممتلئ، صدّر نسخة احتياطية|Stockage plein, exportez une sauvegarde
+shop|بيانات المحل (تظهر على الوصولات)|Infos du magasin (sur les bons)
+bkp|💾 نسخة احتياطية JSON|💾 Sauvegarde JSON
+rst|♻ استرجاع نسخة|♻ Restaurer
+scan|مسح الباركود / SKU ثم Enter|Scanner code-barres / SKU puis Entrée
+topd|أكبر المدينين|Plus gros débiteurs
+lowst|مخزون منخفض|Stock bas
+ticketp|🖨 وصل|🖨 Bon
+state|الحالة|Statut
+ref|رقم|N°
+outp|📤 وصل تسليم|📤 Bon de sortie
+slipp|📋 ورقة عامل|📋 Fiche technicien
+outtt|وصل تسليم سكوتر|Bon de sortie
+slipt|ورقة مهمة العامل|Fiche de travail
+stmt|كشف|Relevé
+expx|تصدير Excel|Export Excel
+expall|نسخة كاملة Excel|Tout en Excel
+prl|طباعة القائمة|Imprimer la liste
+impc|استيراد زبائن Excel/CSV|Import clients Excel/CSV`.split('\n').forEach(l=>{let[a,b,c]=l.split('|');L.ar[a]=b;L.fr[a]=c});
+const t=k=>L[D.lang][k]||k;
+const inp=(i,l,ty='text',val='',ex='')=>`<label>${l}<input id="${i}" type="${ty}" value="${x(val)}" ${ex}></label>`;
+const sel=(i,l,o,cur)=>`<label>${l}<select id="${i}">${o.map(a=>`<option value="${x(a[0])}" ${a[0]==cur?'selected':''}>${x(a[1])}</option>`).join('')}</select></label>`;
+const pm=()=>sel('pm0',t('method'),[['cash',t('cash')],['card',t('card')],['bank',t('bank')]]);
+function rng(){let n=new Date(),y=n.getFullYear(),m=n.getMonth(),d=n.getDate(),Y=(a,b,c)=>a+'-'+p2(b+1)+'-'+p2(c),td=Y(y,m,d),per=D.per;
+if(per=='today')return[td,td];
+if(per=='week'){let a=new Date(y,m,d-n.getDay());return[Y(a.getFullYear(),a.getMonth(),a.getDate()),td]}
+if(per=='prev'){let a=new Date(y,m-1,1),e=new Date(y,m,0);return[Y(a.getFullYear(),a.getMonth(),1),Y(e.getFullYear(),e.getMonth(),e.getDate())]}
+if(per=='year')return[y+'-01-01',y+'-12-31'];
+if(per=='custom')return[D.f||'0000-00-00',D.to||'9999-12-31'];
+return[Y(y,m,1),Y(y,m,new Date(y,m+1,0).getDate())]}
+const inR=dt=>{let[a,b]=rng(),d=dt.slice(0,10);return d>=a&&d<=b};
+const sm=(acc,pt,all)=>D.l.filter(z=>z.acc==acc&&(!pt||z.party==pt)&&(all||inR(z.dt))).reduce((a,z)=>a+z.amt,0);
+const cb=c=>({debt:sm('cd',c,1)-sm('cp',c,1),adv:sm('ca',c,1)-sm('cu',c,1)});
+const eb=e=>({earn:sm('ee',e,1),paid:sm('ep',e,1),adv:sm('ea',e,1),owed:sm('ee',e,1)-sm('ep',e,1)-sm('ea',e,1)});
+function led(acc,amt,party,ref,method,desc,dt){amt=+amt;if(!(amt>0)){toast(t('amount'));return 0}let k=acc+'|'+party+'|'+amt,n=Date.now();
+if(!ref&&D.l.some(z=>z.k==k&&n-z.ts<8000)){toast(t('dupe'));return 0}
+D.l.push({id:id('T'),acc,amt,dt:dt||nowS(),party,ref:ref||'',method:method||'cash',desc:desc||'',user:'admin',ts:n,k});return 1}
+const mv=(p,ty,q,ref,note,dt)=>D.m.push({id:id('M'),p,ty,q,dt:dt||nowS(),ref:ref||'',u:'admin',n:note||''});
+const P=i=>D.p.find(z=>z.id==i),C=i=>D.c.find(z=>z.id==i),E=i=>D.e.find(z=>z.id==i);
+function ch(lb,ss){let W=320,H=130,mx=Math.max(1,...ss.flatMap(s=>s.v)),bw=W/lb.length,w=bw*.8/ss.length;
+return`<svg viewBox="0 0 ${W} ${H+18}" style="width:100%;max-width:560px">`+lb.map((l,i)=>ss.map((s,j)=>{let h=Math.max(0,s.v[i])/mx*H;return`<rect x="${i*bw+bw*.1+j*w}" y="${H-h}" width="${w}" height="${h}" fill="${s.c}"><title>${s.n}: ${f(s.v[i])}</title></rect>`}).join('')+`<text x="${i*bw+bw/2}" y="${H+12}" font-size="8" text-anchor="middle" fill="currentColor">${x(l)}</text>`).join('')+'</svg><div class="mu">'+ss.map(s=>`<span style="color:${s.c}">■</span> ${s.n} `).join('')+'</div>'}
+const months=(n,y)=>{let r=[],d=new Date();if(y)for(let i=0;i<12;i++)r.push(y+'-'+p2(i+1));else for(let i=n-1;i>=0;i--){let a=new Date(d.getFullYear(),d.getMonth()-i,1);r.push(a.getFullYear()+'-'+p2(a.getMonth()+1))}return r};
+const bar=()=>`<div class="card"><div class="g">${sel('per',t('date'),['today','week','month','prev','year','custom'].map(k=>[k,t(k)]),D.per).replace('<select','<select onchange="D.per=this.value;R()"')}${D.per=='custom'?inp('df',t('from'),'date',D.f,'onchange="D.f=this.value;R()"')+inp('dt',t('to'),'date',D.to,'onchange="D.to=this.value;R()"'):''}</div></div>`;
+const tbl=(h,rows)=>`<div class="ov"><table><tr>${h.map(a=>`<th>${a}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const kp=(l,val,c='')=>`<div><span class="mu">${l}</span><b class="${c}">${typeof val=='number'?f(val):val}</b></div>`;
+const V={};
+V.dash=()=>{let S=D.s.filter(s=>inR(s.dt)),rv=S.reduce((a,s)=>a+s.total,0),cg=S.reduce((a,s)=>a+s.cogs,0),ex=sm('ex'),lb=sm('ee'),net=rv-cg-ex-lb;
+let ms=months(6),mS=k=>D.s.filter(s=>s.dt.startsWith(k));
+return bar()+`<div class="k">${kp(t('rev'),rv)}${kp(t('cogs'),cg)}${kp(t('gp'),rv-cg,'ok')}${kp(t('exp'),ex)}${kp(t('lab'),lb)}${kp(t('net'),net,net<0?'er':'ok')}${kp(t('debts'),D.c.reduce((a,c)=>a+cb(c.id).debt,0),'er')}${kp(t('stockv'),D.p.reduce((a,p)=>a+p.qty*p.cost,0))}</div>
+<div class="card"><h3>${t('mon')}</h3>${ch(ms,[{n:t('rev'),c:'#2563eb',v:ms.map(k=>mS(k).reduce((a,s)=>a+s.total,0))},{n:t('gp'),c:'#16a34a',v:ms.map(k=>mS(k).reduce((a,s)=>a+s.total-s.cogs,0))},{n:t('exp'),c:'#dc2626',v:ms.map(k=>D.l.filter(z=>z.acc=='ex'&&z.dt.startsWith(k)).reduce((a,z)=>a+z.amt,0))}])}</div><div class="card"><h3>${t('topd')}</h3>${tbl([t('name'),t('debt')],D.c.map(c=>[x(c.n),cb(c.id).debt]).filter(r=>r[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,5).map(r=>[r[0],f(r[1])]))}</div><div class="card"><h3>${t('lowst')}</h3>${tbl([t('name'),t('qty'),t('min')],D.p.filter(p=>p.qty<=p.min).slice(0,8).map(p=>[x(p.n),p.qty,p.min]))}</div>`};
+function addC(){let n=v('cn').trim(),p=v('cp').replace(/\D/g,'');if(!n||!p)return toast(t('req'));let o=D.c.find(c=>c.p==p);if(o){D.sel=o.id;toast(t('exists')+': '+o.n);return R()}
+D.c.push({id:id('C'),n,p,a:v('ca'),d:nowS().slice(0,10)});D.sel=D.c[D.c.length-1].id;R()}
+function cl(q){q=q.toLowerCase();$('#cl').innerHTML=D.c.filter(c=>(c.n+c.p).toLowerCase().includes(q)).slice(0,30).map(c=>`<button class="sm" onclick="D.sel='${c.id}';R()">${x(c.n)} · ${x(c.p)}</button> `).join('')}
+function cpay(cid,k){let a=+v('pa'),b=cb(cid);if(k=='d'){if(a>b.debt)return toast(t('over'));led('cp',a,cid,'',v('pm0'),'',dts('pdt'))}
+else if(k=='a'){led('ca',a,cid,'',v('pm0'),'',dts('pdt'))}else{a=Math.min(b.adv,b.debt);if(a>0){let r='ADV'+Date.now();led('cu',a,cid,r);led('cp',a,cid,r)}}R()}
+V.cust=()=>{let s=C(D.sel),h=`<div class="card"><h3>${t('add')}</h3><div class="g">${inp('cn',t('name'))}${inp('cp',t('phone'),'tel')}${inp('ca',t('addr'))}</div><button class="pr" onclick="addC()">${t('save')}</button></div><div class="card">${inp('q',t('search'),'text','','oninput="cl(this.value)"')}<div id="cl"></div></div>`;
+if(s){let b=cb(s.id),rp=D.r.filter(r=>r.c==s.id),ss=D.s.filter(z=>z.c==s.id);h+=`<div class="card"><h3>${x(s.n)} · ${x(s.p)}</h3><div class="mu">${x(s.a)} · ${s.d}</div><div class="g">${inp('ec',t('name'),'text',s.n)}${inp('ep',t('phone'),'tel',s.p)}${inp('eaa',t('addr'),'text',s.a)}<button onclick="edC('${s.id}')">${t('save')}</button></div><div class="k">${kp(t('debt'),b.debt,'er')}${kp(t('advp'),b.adv,'ok')}</div><p>🛴 ${[...new Set(rp.map(r=>r.m))].map(x).join(' / ')||'-'}</p>
+<div class="g">${inp('pa',t('amount'),'number')}${inp('pdt',t('date'),'date',td())}${pm()}</div><button onclick="cpay('${s.id}','d')">${t('settle')}</button> <button onclick="cpay('${s.id}','a')">${t('advp')}</button> <button onclick="cpay('${s.id}','u')">${t('useadv')}</button>
+<h3>${t('hist')}</h3>${tbl([t('date'),t('type'),t('total'),t('paid')],[...rp.map(r=>[r.dt||'-',t('rep')+' '+x(r.m),f(r.total||0),f(r.pd||0)]),...ss.filter(z=>z.t=='sale').map(z=>[z.dt,t('invoice')+' '+z.id,f(z.total),f(z.paid)])])}</div>`}return h};
+function sv(){D.dr.c=v('rc');D.dr.m=v('rm');D.dr.l=v('rl');D.dr.d=v('rd');D.dr.tp=v('rtp')}
+function addPart(){sv();let q=+v('rq');if(v('rpp')&&q>0)D.dr.parts.push({p:v('rpp'),q});R()}
+function addTech(){sv();if(v('rt'))D.dr.techs.push({e:v('rt'),k:v('rk')});R()}
+function mkRep(){sv();let d=D.dr;if(!d.c||!d.m||!d.techs.length||+d.l<0)return toast(t('req'));D.r.push({id:id('R'),c:d.c,m:d.m,tp:d.tp,labor:+d.l||0,parts:d.parts,techs:d.techs,status:'open',cd:dts('rd')});D.dr={parts:[],techs:[]};R();tkt(D.r[D.r.length-1].id)}
+function fin(rid){let r=D.r.find(z=>z.id==rid);if(!r||r.status=='done')return;for(let q of r.parts){if(P(q.p).qty<q.q)return toast(t('nostock')+': '+P(q.p).n)}
+let cg=0,pr=0;r.parts.forEach(q=>{let p=P(q.p);cg+=q.q*p.cost;pr+=q.q*p.price;p.qty-=q.q;mv(p.id,'repair',-q.q,r.id,'',dts('rf'+rid))});
+r.total=r.labor+pr;r.cogs=cg;r.status='done';r.dt=dts('rf'+rid);let pd=Math.max(0,Math.min(+v('rp'+rid)||0,r.total));r.pd=pd;
+r.techs.forEach(k=>{let e=E(k.e),a=e.mode=='fix'?+e.rate:(e.mode=='pct'||e.mode=='mix')?e.rate/100*r.labor/r.techs.length:0;k.earn=a;if(a>0)led('ee',a,e.id,r.id,'','',r.dt)});
+D.s.push({id:id('S'),dt:r.dt,t:'repair',ref:r.id,c:r.c,total:r.total,cogs:cg,paid:pd});if(r.total>pd)led('cd',r.total-pd,r.c,r.id,'','',r.dt);R()}
+V.rep=()=>{let d=D.dr;return`<div class="card"><h3>${t('create')}</h3><div class="g">${sel('rc','',[['',t('cust')],...D.c.map(c=>[c.id,c.n+' '+c.p])],d.c)}${inp('rm',t('model'),'text',d.m)}${inp('rtp',t('mtype'),'text',d.tp)}${inp('rl',t('labor'),'number',d.l)}${inp('rd',t('workdate'),'date',d.d||td())}</div>
+<div class="g">${sel('rpp',t('part'),[['',''],...D.p.map(p=>[p.id,p.n+' ('+p.qty+')'])])}${inp('rq',t('qty'),'number',1)}<button onclick="addPart()">${t('add')} ${t('part')}</button></div>
+<div class="g">${sel('rt',t('tech'),[['',''],...D.e.map(e=>[e.id,e.n])])}${inp('rk',t('task'))}<button onclick="addTech()">${t('add')} ${t('tech')}</button></div>
+<p>${d.parts.map(q=>x(P(q.p).n)+' ×'+q.q).join(' · ')}</p><p>${d.techs.map(k=>x(E(k.e).n)+': '+x(k.k)).join(' · ')}</p><button class="pr" onclick="mkRep()">${t('create')}</button></div>`+
+D.r.slice().reverse().map(r=>`<div class="card"><b>${r.id} · ${x(r.m)}</b> · ${x(r.tp)} · 📅 ${(r.dt||r.cd||'').slice(0,10)} <button class="sm" onclick="tkt('${r.id}')">${t('ticketp')}</button> <button class="sm" onclick="slip('${r.id}')">${t('slipp')}</button>${r.status=='done'?` <button class="sm" onclick="out('${r.id}')">${t('outp')}</button>`:''} · ${x((C(r.c)||{}).n)} · <span class="${r.status=='done'?'ok':''}">${t(r.status=='done'?'done':'open')}</span><br>${r.techs.map(k=>x(E(k.e).n)+' ('+x(k.k)+')'+(k.earn!=null?' = '+f(k.earn):'')).join(' · ')}<br>${r.parts.map(q=>x(P(q.p).n)+'×'+q.q).join(' · ')} · ${t('labor')}: ${f(r.labor)}${r.status=='done'?' · '+t('total')+': '+f(r.total)+' · '+t('paid')+': '+f(r.pd):`<div class="g" style="margin-top:6px">${inp('rf'+r.id,t('workdate'),'date',(r.cd||'').slice(0,10)||td())}${inp('rp'+r.id,t('paid'),'number')}<button class="pr" onclick="fin('${r.id}')">${t('complete')}</button></div>`}</div>`).join('')};
+function addE(){let n=v('en').trim();if(!n)return;D.e.push({id:id('E'),n,mode:v('em'),rate:+v('er')||0,sal:+v('es')||0});R()}
+function pyE(e,a){let b=eb(e),m=+v('ea'+e);if(a=='ep'&&m>b.owed)return toast(t('over'));if(led(a,m,e,'','','',dts('ed'+e)))R()}
+function accr(e){let o=E(e),mo=rng()[0].slice(0,7),r='SAL-'+e+'-'+mo;if(D.l.some(z=>z.ref==r))return toast(t('dupe'));led('ee',o.sal,e,r,'',t('salary')+' '+mo);R()}
+V.emp=()=>{let rs=D.r.filter(r=>r.status=='done'&&inR(r.dt)),ys=months(0,rng()[0].slice(0,4)),
+h=bar()+`<div class="card"><h3>${t('add')}</h3><div class="g">${inp('en',t('name'))}${sel('em',t('mode'),['fix','pct','sal','mix'].map(k=>[k,t(k)]))}${inp('er',t('rate'),'number')}${inp('es',t('salary'),'number')}</div><button class="pr" onclick="addE()">${t('add')}</button></div>
+<div class="card"><b>${t('scooters')}: ${rs.length}</b> (${t('orders')})</div>`;
+h+=D.e.map(e=>{let o=rs.filter(r=>r.techs.some(k=>k.e==e.id)),b=eb(e.id);return`<div class="card"><h3>${x(e.n)} <span class="mu">${t(e.mode)} ${e.rate||''} ${e.sal?'/ '+e.sal:''}</span></h3><div class="k">${kp(t('scooters'),o.length)}${kp(t('orders'),o.length)}${kp(t('tasks'),o.reduce((a,r)=>a+r.techs.filter(k=>k.e==e.id).length,0))}${kp(t('earn'),sm('ee',e.id))}${kp(t('paid'),sm('ep',e.id))}${kp(t('adv'),sm('ea',e.id))}${kp(t('owed'),b.owed,b.owed>0?'er':'ok')}</div>
+${tbl([t('date'),t('rep'),t('task'),t('earn')],o.map(r=>[r.dt.slice(0,10),x(r.m),r.techs.filter(k=>k.e==e.id).map(k=>x(k.k)).join(', '),f(r.techs.filter(k=>k.e==e.id).reduce((a,k)=>a+(k.earn||0),0))]))}<div class="g" style="margin-top:8px">${inp('ea'+e.id,t('amount'),'number')}${inp('ed'+e.id,t('paydate'),'date',td())}${inp('np'+e.id,t('nextpay'),'date',e.np||'',`onchange="E('${e.id}').np=this.value;save()"`)}<button onclick="pyE('${e.id}','ep')">${t('pay')}</button><button onclick="pyE('${e.id}','ea')">${t('adv')}</button><button onclick="ps('${e.id}')">🖨 ${t('stmt')}</button>${e.sal?`<button onclick="accr('${e.id}')">${t('accrue')}</button>`:''}</div></div>`}).join('');
+return h+(D.e.length?`<div class="card"><h3>${t('cmp')}</h3>${ch(D.e.map(e=>e.n),[{n:t('orders'),c:'#2563eb',v:D.e.map(e=>rs.filter(r=>r.techs.some(k=>k.e==e.id)).length)}])}</div><div class="card"><h3>${t('earn')} / ${t('paid')} ${rng()[0].slice(0,4)}</h3>${ch(ys.map(k=>k.slice(5)),[{n:t('earn'),c:'#2563eb',v:ys.map(k=>D.l.filter(z=>z.acc=='ee'&&z.dt.startsWith(k)).reduce((a,z)=>a+z.amt,0))},{n:t('paid'),c:'#16a34a',v:ys.map(k=>D.l.filter(z=>(z.acc=='ep'||z.acc=='ea')&&z.dt.startsWith(k)).reduce((a,z)=>a+z.amt,0))}])}</div>`:'')};
+const K=['n','s','c','b','m','q','pc','sp','mn','su','d'],KL=['name','sku','cat','brand','model','qty','cost','price','min','supplier','desc'];
+function csv(s){let r=[],w=[],c='',q=0,dl=(s.split('\n')[0].match(/;/g)||[]).length>(s.split('\n')[0].match(/,/g)||[]).length?';':',';for(let i=0;i<s.length;i++){let ch=s[i];if(q){if(ch=='"'&&s[i+1]=='"'){c+='"';i++}else if(ch=='"')q=0;else c+=ch}else if(ch=='"')q=1;else if(ch==dl){w.push(c);c=''}else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&s[i+1]=='\n')i++;w.push(c);r.push(w);w=[];c=''}else c+=ch}if(c||w.length){w.push(c);r.push(w)}return r}
+async function imp(fl){if(!fl)return;let rows;if(/\.xlsx?$/i.test(fl.name)){if(!window.XLSX)return toast('XLSX lib blocked');let wb=XLSX.read(await fl.arrayBuffer());rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1})}else rows=csv(await fl.text());
+rows=rows.filter(r=>r.some(c=>String(c).trim()!==''));if(rows.length&&isNaN(rows[0][5]))rows.shift();D.imp=rows.map(r=>Object.fromEntries(K.map((k,i)=>[k,r[i]??''])));R()}
+function val(r,i){let e=[];['n','s','q','pc','sp'].forEach(k=>{if(String(r[k]).trim()==='')e.push(t('missing')+' '+KL[K.indexOf(k)])});['q','pc','sp','mn'].forEach(k=>{if(String(r[k]).trim()!==''&&!(+r[k]>=0))e.push(KL[K.indexOf(k)]+'?')});
+let s=String(r.s).trim();if(s&&D.imp.some((z,j)=>j!=i&&String(z.s).trim()==s))e.push(t('dup'));if(s&&D.p.some(p=>p.s==s))e.push(t('dup')+' (DB)');return e}
+function stAll(){let bad=0;D.imp.forEach((r,i)=>{let e=val(r,i);bad+=e.length?1:0;let c=document.getElementById('st'+i);if(c){c.innerHTML=e.length?e.join('<br>'):t('valid');c.className=e.length?'er':'ok'}});
+$('#itot').textContent=D.imp.length+' / '+D.imp.reduce((a,r)=>a+(+r.q||0),0);$('#icf').disabled=!!bad||!D.imp.length}
+function impEdit(i,k,val_){D.imp[i][k]=val_;stAll()}
+function confirmImp(){if(D.imp.some((r,i)=>val(r,i).length))return toast(t('dup'));let ref=id('O'),dt=dts('idt');D.imp.forEach(r=>{let p={id:id('P'),n:r.n,s:String(r.s).trim(),c:r.c,b:r.b,m:r.m,su:r.su,d:r.d,qty:+r.q,cost:+r.pc,price:+r.sp,min:+r.mn||0,bt:[{q:+r.q,c:+r.pc,dt,ref}]};D.p.push(p);mv(p.id,'init',p.qty,ref,'OPENING',dt);D.o.push({id:id('OS'),ref,p:p.id,q:p.qty,c:p.cost,dt})});D.imp=null;R()}
+function addP(){let n=v('nn').trim(),s=v('ns').trim();if(!n||!s)return toast(t('req'));if(D.p.some(p=>p.s==s))return toast(t('dup'));let dt=dts('nd'),q=+v('nq')||0,c0=+v('nco')||0,go=im=>{let p={id:id('P'),n,s,c:v('nc'),su:v('nsu'),qty:q,cost:c0,price:+v('npr')||0,min:+v('nm')||0,im,bt:[{q,c:c0,dt}]};D.p.push(p);if(q)mv(p.id,'init',q,id('O'),'MANUAL',dt);R()};let fl=document.getElementById('nim').files[0];fl?img(fl,200,go):go('')}
+function buy(){let p=P(v('bp')),q=+v('bq'),c=+v('bc');if(!p||!(q>0)||!(c>=0))return toast(t('req'));p.cost=(p.qty*p.cost+q*c)/(p.qty+q);p.qty+=q;(p.bt=p.bt||[]).push({q,c,dt:dts('bd')});let r=id('PU');mv(p.id,'purchase',q,r,v('bs'),dts('bd'));
+let pd=v('bpd')===''?q*c:+v('bpd'),rest=q*c-pd;if(rest>0)led('sd',rest,v('bs')||'?',r,'','',dts('bd'));R()}
+function adj(){let p=P(v('ap')),q=+v('aq'),ty=v('aty');if(!p||!q)return;let d=ty=='cret'?Math.abs(q):ty=='adj'?q:-Math.abs(q);if(p.qty+d<0)return toast(t('nostock'));p.qty+=d;mv(p.id,ty,d,id('AD'),v('an'),dts('ad'));R()}
+V.inv=()=>{let h=`<div class="card"><h3>${t('imp')}</h3><input type="file" accept=".csv,.xlsx,.xls" onchange="imp(this.files[0])"> <button onclick="D.imp=(D.imp||[]);D.imp.push(Object.fromEntries(K.map(k=>[k,''])));R()">${t('row')}</button>${inp('idt',t('date'),'date',td())}<p class="mu">${KL.join(' | ')}</p>`;
+if(D.imp)h+=`<div class="ov"><table><tr>${KL.map(k=>`<th>${k}</th>`).join('')}<th></th></tr>${D.imp.map((r,i)=>`<tr>${K.map(k=>`<td><input value="${x(r[k])}" oninput="impEdit(${i},'${k}',this.value)"></td>`).join('')}<td id="st${i}"></td></tr>`).join('')}</table></div><p>${t('totals')}: <b id="itot"></b></p><button class="pr" id="icf" onclick="confirmImp()">${t('confirm')}</button> <button onclick="D.imp=null;R()">✕</button>`;
+h+=`</div><div class="card"><h3>${t('newprod')}</h3><div class="g">${inp('nn',t('name'))}${inp('ns',t('sku'))}${inp('nc',t('cat'))}${inp('nq',t('qty'),'number')}${inp('nco',t('cost'),'number')}${inp('npr',t('price'),'number')}${inp('nm',t('min'),'number')}${inp('nsu',t('supplier'))}${inp('nd',t('date'),'date',td())}<label>🖼<input id="nim" type="file" accept="image/*"></label><button class="pr" onclick="addP()">${t('add')}</button></div></div><div class="card"><h3>${t('purchase')}</h3><div class="g">${inp('bd',t('date'),'date',td())}${sel('bp','',D.p.map(p=>[p.id,p.n]))}${inp('bq',t('qty'),'number')}${inp('bc',t('cost'),'number')}${inp('bs',t('supplier'))}${inp('bpd',t('paid'),'number')}<button onclick="buy()">${t('purchase')}</button></div></div>
+<div class="card"><h3>${t('adjust')}</h3><div class="g">${sel('ap','',D.p.map(p=>[p.id,p.n]))}${sel('aty','',['adj','dmg','cret','sret'].map(k=>[k,t(k)]))}${inp('aq',t('qty'),'number')}${inp('an',t('note'))}${inp('ad',t('date'),'date',td())}<button onclick="adj()">${t('save')}</button></div></div>
+<div class="card"><h3>${t('prods')}</h3>${tbl([t('name'),'SKU',t('qty'),t('cost'),t('price'),t('profit'),t('margin'),t('value')],D.p.map(p=>[(p.im?`<img src="${p.im}" style="height:36px;border-radius:6px;vertical-align:middle"> `:'')+`<label style="cursor:pointer">📷<input type="file" accept="image/*" hidden onchange="img(this.files[0],200,d=>{P('${p.id}').im=d;R()})"></label> `+x(p.n),x(p.s),`<span class="${p.qty<=p.min?'er':''}">${p.qty}</span>`,f(p.cost),`<input type="number" value="${p.price}" onchange="P('${p.id}').price=+this.value||0;R()">`,f(p.price-p.cost),(p.price?(p.price-p.cost)/p.price*100:0).toFixed(1)+'%',f(p.qty*p.cost)]))}</div>
+<div class="card"><h3>${t('move')}</h3>${tbl([t('date'),t('prods'),t('type'),t('qty'),'Ref',t('note')],D.m.slice(-40).reverse().map(m=>[m.dt,x((P(m.p)||{}).n),t(m.ty),m.q,m.ref,x(m.n)]))}</div>`;return h};
+function addCart(p,q){p=p||v('cpp');q=q||+v('cq');if(p&&q>0){let l=D.cart.find(z=>z.p==p);if(l)l.q+=q;else D.cart.push({p,q})}R();let e=document.getElementById('scan');e&&e.focus()}
+function edC(i){let c=C(i),p=v('ep').replace(/\D/g,''),n=v('ec').trim();if(!n||!p)return toast(t('req'));if(D.c.some(z=>z.id!=i&&z.p==p))return toast(t('exists'));c.n=n;c.p=p;c.a=v('eaa');R()}
+async function bk(){try{let dl=await claude.use('downloads');await dl.save({filename:'tam-backup-'+td()+'.json',data:JSON.stringify(D)})}catch(e){if(!e||e.code!='declined')toast('⚠')}}
+async function rs(fl){if(!fl||!confirm(t('rst')+' ?'))return;try{let o=JSON.parse(await fl.text());if(!Array.isArray(o.c)||!Array.isArray(o.l)||!Array.isArray(o.p))throw 0;D={...D,...o};R();toast('✔')}catch(e){toast('⚠ JSON')}}
+function sell(){let c=v('sc'),ds=+v('sd')||0,it=D.cart.map(i=>{let p=P(i.p);return{p:p.id,n:p.n,q:i.q,pr:p.price,cost:p.cost}});if(!it.length)return;
+for(let i of it)if(P(i.p).qty<i.q)return toast(t('nostock')+': '+i.n);let sub=it.reduce((a,i)=>a+i.q*i.pr,0),tot=Math.max(0,sub-ds),pd=v('spd')===''?tot:Math.max(0,Math.min(+v('spd'),tot));if(pd<tot&&!c)return toast(t('needc'));
+let cg=0;it.forEach(i=>{P(i.p).qty-=i.q;cg+=i.q*i.cost});let s={id:id('S'),dt:dts('sdt'),t:'sale',c,items:it,dis:ds,total:tot,cogs:cg,paid:pd,method:v('pm0')};D.s.push(s);it.forEach(i=>mv(i.p,'sale',-i.q,s.id,'',s.dt));if(tot>pd)led('cd',tot-pd,c,s.id,'','',s.dt);D.cart=[];save();R();inv(s)}
+function inv(s){$('#invoice').innerHTML=`<div class="card rc" style="max-width:${pw()}">${hd()}<h3>${t('invoice')} ${s.id}</h3><div>${s.dt} · ${x((C(s.c)||{n:t('walk')}).n)}</div>${tbl([t('prods'),t('qty'),t('price'),t('total')],s.items.map(i=>[x(i.n),i.q,f(i.pr),f(i.q*i.pr)]))}<p>${t('disc')}: ${f(s.dis)} · <b>${t('total')}: ${f(s.total)}</b> · ${t('paid')}: ${f(s.paid)}</p>${pb()}</div>`}
+V.pos=()=>{let sub=D.cart.reduce((a,i)=>a+i.q*P(i.p).price,0);return`<div class="card"><h3>${t('pos')}</h3><div class="g">${inp('scan',t('scan'),'text','',`onkeydown="if(event.key=='Enter'){let p=D.p.find(z=>z.s==this.value.trim());this.value='';p?addCart(p.id,1):toast('⚠ SKU')}"`)}${sel('cpp','',[['',''],...D.p.map(p=>[p.id,p.n+' · '+f(p.price)+' ('+p.qty+')'])])}${inp('cq',t('qty'),'number',1)}<button onclick="addCart()">${t('add')}</button></div>${tbl([t('prods'),t('qty'),t('total'),''],D.cart.map((i,k)=>[x(P(i.p).n),i.q,f(i.q*P(i.p).price),`<button class="sm" onclick="D.cart.splice(${k},1);R()">✕</button>`]))}<p><b>${t('total')}: ${f(sub)}</b></p>
+<div class="g">${sel('sc',t('cust'),[['',t('walk')],...D.c.map(c=>[c.id,c.n+' '+c.p])])}${inp('sd',t('disc'),'number')}${inp('spd',t('paid'),'number')}${inp('sdt',t('date'),'date',td())}${pm()}</div><button class="pr" onclick="sell()">${t('sale')}</button> <button onclick="D.cart=[];R()">✕</button></div>`};
+function addEx(){let ty=v('ft'),pt=v('fp');if(led(ty,v('fa'),pt,'','cash',v('fd'),dts('fdt')))R()}
+function rv(i){let z=D.l.find(a=>a.id==i);if(!z||z.rv||z.amt<0)return;z.rv=1;D.l.push({...z,id:id('T'),amt:-z.amt,dt:nowS(),desc:'REV '+z.id,rv:1,k:'',ref:z.id});R()}
+V.fin=()=>{let sd=D.l.filter(z=>z.acc=='sd'||z.acc=='sp'),a=[[t('debts'),D.c.reduce((q,c)=>q+cb(c.id).debt,0)],[t('advp'),D.c.reduce((q,c)=>q+cb(c.id).adv,0)],[t('earn'),sm('ee',0,1)],[t('adv')+' '+t('emp'),sm('ea',0,1)],[t('pay')+' '+t('emp'),sm('ep',0,1)],[t('a_sd'),sm('sd',0,1)-sm('sp',0,1)],[t('exp'),sm('ex',0,1)]];
+return`<div class="k">${a.map(r=>kp(r[0],r[1])).join('')}</div><div class="card"><div class="g">${sel('ft','',[['ex',t('a_ex')],['sp',t('a_sp')]])}${inp('fp',t('party'))}${inp('fa',t('amount'),'number')}${inp('fd',t('desc'))}${inp('fdt',t('date'),'date',td())}<button class="pr" onclick="addEx()">${t('add')}</button></div></div><div class="card"><h3>${t('ledger')}</h3>${tbl(['ID',t('date'),t('type'),t('amount'),t('party'),t('method'),t('desc'),''],D.l.slice(-60).reverse().map(z=>[z.id,z.dt,t('a_'+z.acc),f(z.amt),x((C(z.party)||E(z.party)||{n:z.party}).n),z.method,x(z.desc),z.rv||z.amt<0?'':`<button class="sm" onclick="rv('${z.id}')">${t('reverse')}</button>`]))}</div><div class="card"><h3>${t('shop')}</h3><div class="g">${inp('shn',t('name'),'text',D.shop.n)}${inp('shp',t('phone'),'text',D.shop.p)}${inp('sha',t('addr'),'text',D.shop.a)}<button class="pr" onclick="D.shop={n:v('shn'),p:v('shp'),a:v('sha')};save();toast('✔')">${t('save')}</button></div><button onclick="bk()">${t('bkp')}</button> <label class="mu" style="cursor:pointer;border:1px dashed var(--b);padding:6px 10px;border-radius:8px">${t('rst')}<input type="file" accept=".json" hidden onchange="rs(this.files[0])"></label></div><button class="sm" onclick="if(confirm('?')){localStorage.removeItem('tam');window.desk&&window.desk.save('');location.reload()}">${t('reset')}</button>`};
+function R(){document.documentElement.lang=D.lang;document.documentElement.dir=D.lang=='ar'?'rtl':'ltr';if(D.th)document.documentElement.dataset.theme=D.th;else delete document.documentElement.dataset.theme;
+$('#ttl').textContent=t('ttl');$('#sub').textContent=t('sub');$('#qb').textContent=t('qbrief');$('#aih').textContent='🤖 '+t('ai');$('#aq').placeholder=t('ai');ping();$('#logo').innerHTML=D.logo?`<img class="lg" src="${D.logo}">`:'🛴';$('#nav').innerHTML=tabs.map(k=>`<button class="${D.tab==k?'on':''}" onclick="D.tab='${k}';R()">${t(k)}</button>`).join('');$('#main').innerHTML=xb()+V[D.tab]();if($('#cl'))cl('');if(D.imp&&$('#itot'))stAll();save()}
+function alerts(){let a=[],z=td();D.p.forEach(p=>{if(p.qty<=p.min)a.push(['📦',t('a_low')+': '+p.n+' ('+p.qty+')'])});D.c.forEach(c=>{let b=cb(c.id).debt;if(b>0)a.push(['💰',t('a_debt')+': '+c.n+' '+f(b)])});D.e.forEach(e=>{let o=eb(e.id).owed;if(e.np&&e.np<=z&&o>0)a.push(['👷',t('a_pay')+': '+e.n+' '+f(o)])});D.r.forEach(r=>{if(r.status=='open'&&(r.cd||'').slice(0,10)<z)a.push(['🛠',t('a_old')+': '+r.id+' '+r.m])});return a}
+function ping(){let a=alerts(),k=a.map(z=>z[1]).join('|'),b=$('#bell');if(b)b.textContent=a.length||'';if(k&&k!==D.lastN){D.lastN=k;toast('🔔 '+a[0][1]);try{if(window.Notification&&Notification.permission=='granted')new Notification(t('ttl'),{body:a.slice(0,4).map(z=>z[1]).join('\n')})}catch(e){}}if(!k)D.lastN=''}
+setInterval(ping,60000);
+function aiTog(){let p=$('#ai');p.classList.toggle('on');if(p.classList.contains('on')){$('#alr').innerHTML=alerts().map(z=>`<div>${z[0]} ${x(z[1])}</div>`).join('')||'✅';try{if(window.Notification&&Notification.permission=='default')Notification.requestPermission()}catch(e){}}}
+const AH=[],ST={type:'string'},NU={type:'number'};let SM;
+const tl=(name,description,props,req,fn)=>({name,description,inputSchema:{type:'object',properties:props,required:req},execute:fn});
+const fp=q=>D.p.filter(p=>(p.n+' '+p.s).toLowerCase().includes(String(q).toLowerCase())),fe=q=>D.e.find(e=>e.n.toLowerCase().includes(String(q).toLowerCase())),dd=d=>d?d+'T'+nowS().slice(11):undefined;
+const TOOLS=[tl('get_summary','Shop summary for the selected period: revenue, costs, debts, stock value, open repairs, employees owed, alerts',{},[],()=>{let s0=D.s.filter(s=>inR(s.dt));return{today:td(),period:rng(),revenue:s0.reduce((a,s)=>a+s.total,0),cogs:s0.reduce((a,s)=>a+s.cogs,0),expenses:sm('ex'),customers:D.c.length,products:D.p.length,stockValue:D.p.reduce((a,p)=>a+p.qty*p.cost,0),debts:D.c.reduce((a,c)=>a+cb(c.id).debt,0),openRepairs:D.r.filter(r=>r.status=='open').length,employees:D.e.map(e=>({name:e.n,owed:eb(e.id).owed,nextPay:e.np||null})),alerts:alerts().map(z=>z[1])}}),
+tl('find_customer','Find customers by name or phone, with debt and advance balances',{query:ST},['query'],a=>D.c.filter(c=>(c.n+c.p).toLowerCase().includes(String(a.query).toLowerCase())).slice(0,8).map(c=>({name:c.n,phone:c.p,...cb(c.id)}))),
+tl('add_customer','Register a customer; refuses a duplicate phone',{name:ST,phone:ST},['name','phone'],a=>{let p=String(a.phone).replace(/\D/g,''),o=D.c.find(c=>c.p==p);if(o)return{error:'exists',name:o.n};D.c.push({id:id('C'),n:a.name,p,a:'',d:td()});R();return{ok:1}}),
+tl('find_product','Find products by name or SKU: stock and prices in DA',{query:ST},['query'],a=>fp(a.query).slice(0,8).map(p=>({name:p.n,sku:p.s,qty:p.qty,cost:p.cost,price:p.price}))),
+tl('add_stock','Register a purchase of one product: adds quantity, updates weighted-average cost (DA). Optional date YYYY-MM-DD',{product:ST,qty:NU,unit_cost:NU,date:ST},['product','qty','unit_cost'],a=>{let m=fp(a.product);if(m.length!=1)return{error:'need exactly one match',matches:m.map(p=>p.n)};let p=m[0],q=+a.qty,c=+a.unit_cost,dt=dd(a.date);if(!(q>0)||!(c>=0))return{error:'bad numbers'};p.cost=(p.qty*p.cost+q*c)/(p.qty+q);p.qty+=q;(p.bt=p.bt||[]).push({q,c,dt:dt||nowS()});mv(p.id,'purchase',q,id('PU'),'AI',dt);R();return{ok:1,qty:p.qty}}),
+tl('record_expense','Record a business expense in DA. Optional date YYYY-MM-DD',{amount:NU,description:ST,date:ST},['amount','description'],a=>{let ok=led('ex',a.amount,'','','cash',a.description,dd(a.date));R();return{ok}}),
+tl('pay_employee','Pay an employee (kind=pay, cannot exceed owed) or give an advance (kind=advance), in DA. Optional date YYYY-MM-DD',{employee:ST,amount:NU,kind:ST,date:ST},['employee','amount','kind'],a=>{let e=fe(a.employee);if(!e)return{error:'not found'};let o=eb(e.id).owed,av=a.kind=='advance';if(!av&&a.amount>o)return{error:'exceeds owed',owed:o};let ok=led(av?'ea':'ep',a.amount,e.id,'','cash','AI',dd(a.date));R();return{ok,owed:eb(e.id).owed}})];
+const INS='You are the AI manager of an electric-scooter repair and spare-parts shop app (amounts in Algerian dinar DA). Reply in the user\'s language (Arabic by default), briefly. Use the tools to read data or perform actions; never invent numbers. Perform actions only when the user explicitly asks, then confirm exactly what was done.';
+async function ask(q){q=(q||v('aq')).trim();if(!q)return;$('#aq').value='';let lg=$('#alog'),o=document.createElement('p');lg.insertAdjacentHTML('beforeend',`<p><b>👤</b> ${x(q)}</p>`);lg.appendChild(o);o.textContent='🤖 …';AH.push({role:'user',content:q});try{SM=SM||await claude.use('sample');if(!SM){AH.pop();o.textContent='🤖 —';return}let m=AH.slice(-7).map(z=>({...z}));m[m.length-1].content=INS+'\nToday: '+td()+'\n\n'+q;let r=await SM(m,{cache:false,tools:TOOLS,onText:({text})=>{o.textContent='🤖 '+text;lg.scrollTop=1e9}});o.textContent='🤖 '+r.text;AH.push({role:'assistant',content:r.text})}catch(e){AH.pop();o.textContent='⚠ '+(e.message||e.code)}lg.scrollTop=1e9}
+function tkt(rid){let r=D.r.find(z=>z.id==rid),c=C(r.c)||{n:'',p:''},row=(a,b)=>`<tr><td>${a}</td><td><b>${x(b)}</b></td></tr>`;$('#invoice').innerHTML=`<div class="card tk rc" style="max-width:${pw()}"><div style="text-align:center">${D.logo?`<img class="lg" style="height:60px" src="${D.logo}">`:'🛴'}<h2 style="margin:4px 0;font-family:'Aref Ruqaa',serif">${x(D.shop.n)||t('ttl')}</h2><div class="mu">${t('sub')}</div><div>${x(D.shop.p)} ${x(D.shop.a)}</div></div><hr style="border:1px dashed #888"><h3 style="text-align:center">${t('ticket')} № ${r.id}</h3><table>${row(t('recvd'),(r.cd||'').slice(0,10))}${row(t('name'),c.n)}${row(t('phone'),c.p)}${row(t('model'),r.m)}${row(t('mtype'),r.tp||'')}</table><p style="margin-top:28px">${t('sign')}: ______________</p>${pb()}</div>`;$('#invoice').scrollIntoView()}
+const dd9=s=>(s||'').slice(0,10),pw=()=>D.pw=='80mm'||D.pw=='58mm'?D.pw:'400px',rw=(a,b)=>`<tr><td>${a}</td><td><b>${x(b)}</b></td></tr>`;
+const pb=()=>`<p style="text-align:center"><select onchange="D.pw=this.value;save();this.closest('.card').style.maxWidth=pw()"><option value="a4" ${D.pw!='80mm'&&D.pw!='58mm'?'selected':''}>A4</option><option value="80mm" ${D.pw=='80mm'?'selected':''}>🧾 80mm</option><option value="58mm" ${D.pw=='58mm'?'selected':''}>🧾 58mm</option></select> <button class="pr" onclick="print()">${t('print')}</button> <button onclick="this.closest('.card').remove()">✕</button></p>`;
+const hd=()=>`<div style="text-align:center">${D.logo?`<img class="lg" style="height:56px" src="${D.logo}">`:'🛴'}<h2 style="margin:4px 0;font-family:'Aref Ruqaa',serif">${x(D.shop.n)||t('ttl')}</h2><div class="mu">${t('sub')}</div><div>${x(D.shop.p)} ${x(D.shop.a)}</div></div><hr style="border:1px dashed #888">`;
+const show=h=>{$('#invoice').innerHTML=h;$('#invoice').scrollIntoView()};
+function out(rid){let r=D.r.find(z=>z.id==rid),c=C(r.c)||{n:'',p:''};show(`<div class="card tk rc" style="max-width:${pw()}">${hd()}<h3 style="text-align:center">${t('outtt')} № ${r.id}</h3><table>${rw(t('date'),dd9(r.dt))}${rw(t('name'),c.n)}${rw(t('phone'),c.p)}${rw(t('model'),r.m)}${rw(t('mtype'),r.tp||'')}${rw(t('tech'),r.techs.map(k=>(E(k.e)||{}).n).join(', '))}${rw(t('part'),r.parts.map(q=>(P(q.p)||{}).n+'×'+q.q).join(', '))}${rw(t('total'),f(r.total))}${rw(t('paid'),f(r.pd))}${rw(t('debt'),f(r.total-r.pd))}</table><p style="margin-top:22px">${t('sign')}: ________</p>${pb()}</div>`)}
+function slip(rid){let r=D.r.find(z=>z.id==rid),c=C(r.c)||{n:'',p:''};show(`<div class="card tk rc" style="max-width:${pw()}">${hd()}<h3 style="text-align:center">${t('slipt')} № ${r.id}</h3><table>${rw(t('recvd'),dd9(r.cd))}${rw(t('name'),c.n)}${rw(t('model'),r.m)}${rw(t('mtype'),r.tp||'')}${r.techs.map(k=>rw((E(k.e)||{}).n,k.k)).join('')}${r.parts.map(q=>rw(t('part'),(P(q.p)||{}).n+' ×'+q.q)).join('')}</table>${pb()}</div>`)}
+function ps(i0){let e=E(i0),o=D.r.filter(r=>r.status=='done'&&inR(r.dt)&&r.techs.some(k=>k.e==i0)),b=eb(i0),g=rng();show(`<div class="card rc" style="max-width:${pw()}"><h3 style="text-align:center">${x(e.n)}</h3><div class="mu" style="text-align:center">${g[0]} → ${g[1]}</div>${tbl([t('date'),t('rep'),t('earn')],o.map(r=>[dd9(r.dt),x(r.m),f(r.techs.filter(k=>k.e==i0).reduce((a,k)=>a+(k.earn||0),0))]))}<table>${[[t('earn'),sm('ee',i0)],[t('paid'),sm('ep',i0)],[t('adv'),sm('ea',i0)],[t('owed'),b.owed]].map(a=>`<tr><td>${a[0]}</td><td><b>${f(a[1])}</b></td></tr>`).join('')}</table>${pb()}</div>`)}
+const H=(a,r)=>[a,...r],DSX={
+cust:()=>[[t('cust'),H([t('name'),t('phone'),t('addr'),t('date'),t('debt'),t('advp')],D.c.map(c=>{let b=cb(c.id);return[c.n,c.p,c.a,c.d,b.debt,b.adv]}))]],
+rep:()=>[[t('rep'),H([t('ref'),t('recvd'),t('date'),t('name'),t('phone'),t('model'),t('mtype'),t('tech'),t('part'),t('labor'),t('total'),t('paid'),t('state')],D.r.map(r=>{let c=C(r.c)||{};return[r.id,dd9(r.cd),dd9(r.dt),c.n,c.p,r.m,r.tp||'',r.techs.map(k=>(E(k.e)||{}).n+': '+k.k).join(' | '),r.parts.map(q=>(P(q.p)||{}).n+'×'+q.q).join(' | '),r.labor,r.total||0,r.pd||0,t(r.status=='done'?'done':'open')]}))]],
+emp:()=>[[t('emp'),H([t('name'),t('mode'),t('earn'),t('paid'),t('adv'),t('owed')],D.e.map(e=>{let b=eb(e.id);return[e.n,t(e.mode),b.earn,b.paid,b.adv,b.owed]}))],[t('tasks'),H([t('date'),t('rep'),t('emp'),t('task'),t('earn')],D.r.filter(r=>r.status=='done').flatMap(r=>r.techs.map(k=>[dd9(r.dt),r.id+' '+r.m,(E(k.e)||{}).n,k.k,k.earn||0])))]],
+inv:()=>[[t('prods'),H([t('name'),t('sku'),t('cat'),t('qty'),t('cost'),t('price'),t('profit'),t('min'),t('supplier'),t('value')],D.p.map(p=>[p.n,p.s,p.c,p.qty,p.cost,p.price,p.price-p.cost,p.min,p.su,p.qty*p.cost]))],[t('move'),H([t('date'),t('prods'),t('type'),t('qty'),'Ref',t('note')],D.m.map(m=>[dd9(m.dt),(P(m.p)||{}).n,t(m.ty),m.q,m.ref,m.n]))]],
+pos:()=>[[t('pos'),H([t('invoice'),t('date'),t('cust'),t('prods'),t('disc'),t('total'),t('cogs'),t('gp'),t('paid')],D.s.map(s=>[s.id,dd9(s.dt),(C(s.c)||{n:''}).n,(s.items||[]).map(i=>i.n+'×'+i.q).join(' | ')||s.t,s.dis||0,s.total,s.cogs,s.total-s.cogs,s.paid]))]],
+fin:()=>[[t('ledger'),H(['ID',t('date'),t('type'),t('amount'),t('party'),t('method'),t('desc')],D.l.map(z=>[z.id,dd9(z.dt),t('a_'+z.acc),z.amt,(C(z.party)||E(z.party)||{n:z.party}).n,z.method,z.desc]))]]};
+DSX.dash=()=>['cust','rep','emp','inv','pos','fin'].flatMap(k=>DSX[k]());
+async function xl(k){let ss=DSX[k]();try{let dl=await claude.use('downloads');if(!dl)return toast('Downloads ✗');let nm='tam-'+k+'-'+td();if(window.XLSX){let wb=XLSX.utils.book_new();ss.forEach(([n,r])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(r),n.replace(/[:\\/?*\[\]]/g,'').slice(0,30)));await dl.save({filename:nm+'.xlsx',data:XLSX.write(wb,{type:'array',bookType:'xlsx'})})}else{await dl.save({filename:nm+'.csv',data:'\ufeff'+ss[0][1].map(r=>r.map(z=>'"'+String(z??'').replace(/"/g,'""')+'"').join(',')).join('\n')})}}catch(e){if(e.code!='declined')toast('⚠ '+(e.message||e.code))}}
+function pl(k){show(DSX[k]().map(([n,r])=>`<div class="card"><h3>${x(n)}</h3>${tbl(r[0].map(x),r.slice(1).map(a=>a.map(z=>x(typeof z=='number'?f(z):z))))}</div>`).join('')+`<div class="card">${pb()}</div>`)}
+async function impC(fl){if(!fl)return;let rows;try{if(/\.xlsx?$/i.test(fl.name)){if(!window.XLSX)return toast('XLSX ✗');let wb=XLSX.read(await fl.arrayBuffer());rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1})}else rows=csv(await fl.text())}catch(e){return toast('⚠')}rows=rows.filter(r=>r.some(c=>String(c).trim()!==''));if(rows.length&&/[^\d\s+().-]/.test(String(rows[0][1]??'')))rows.shift();let a=0,s=0;rows.forEach(r=>{let n=String(r[0]??'').trim(),p=String(r[1]??'').replace(/\D/g,'');if(p.length==9)p='0'+p;if(!n||!p||D.c.some(c=>c.p==p)){s++;return}D.c.push({id:id('C'),n,p,a:String(r[2]??''),d:td()});a++});toast('✔ '+a+'  ⏭ '+s);R()}
+const xb=()=>`<div class="card" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button onclick="xl('${D.tab}')">📊 ${t('expx')}</button><button onclick="xl('dash')">📚 ${t('expall')}</button><button onclick="pl('${D.tab}')">🖨 ${t('prl')}</button>${D.tab=='cust'?`<label class="mu" style="cursor:pointer;border:1px dashed var(--b);padding:6px 10px;border-radius:8px">⬆ ${t('impc')}<input type="file" accept=".csv,.xlsx,.xls" hidden onchange="impC(this.files[0])"></label>`:''}</div>`;
+const lg=()=>{D.lang=D.lang=='ar'?'fr':'ar';R()},tm=()=>{D.th=D.th=='dark'?'light':'dark';R()};
+R();
+</script></body></html>
