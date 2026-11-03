@@ -1,0 +1,12 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Trottinette Manager",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Trottinette",
+  "start_url": "/trottinette-app-pro/Trottinette%20AI%20Manager.html",
+  "theme_color": "#ffffff",
+  "description": "Scooter Management App"
+}
